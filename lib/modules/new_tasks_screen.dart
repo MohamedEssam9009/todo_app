@@ -13,8 +13,15 @@ class NewTasksScreen extends StatelessWidget {
         ),
         SizedBox(width: 20.0),
         Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text('New Tasks', style: TextStyle(fontSize: 20.0)),
+            Text(
+              'New Tasks',
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         )
       ],
