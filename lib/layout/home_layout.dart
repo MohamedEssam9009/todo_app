@@ -1,11 +1,13 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:todo_app/components/components.dart';
+import 'package:todo_app/shared/components/components.dart';
 
 import '../modules/archived_tasks_screen.dart';
 import '../modules/done_tasks_screen.dart';
 import '../modules/new_tasks_screen.dart';
+import '../shared/components/constants.dart';
 
 class HomeLayout extends StatefulWidget {
   const HomeLayout({super.key});
@@ -35,8 +37,6 @@ class _HomeLayoutState extends State<HomeLayout> {
   bool isBottomSheetShown = false;
   IconData fabIcon = Icons.edit;
 
-  List<Map> tasks = [];
-
   var titleController = TextEditingController();
   var timeController = TextEditingController();
   var dateController = TextEditingController();
@@ -58,10 +58,18 @@ class _HomeLayoutState extends State<HomeLayout> {
                 date: dateController.text,
               ).then(
                 (value) {
-                  Navigator.of(context).pop();
-                  isBottomSheetShown = false;
-                  setState(() {
-                    fabIcon = Icons.edit;
+                  getDataFromDataBase(database!).then((value) {
+                    setState(() {
+                      tasks = value;
+                      Navigator.of(context).pop();
+                      isBottomSheetShown = false;
+                      fabIcon = Icons.edit;
+                    });
+
+                    debugPrint(tasks.toString());
+                  }).catchError((error) {
+                    debugPrint(
+                        'Error When Getting Data From Table ${error.toString()}');
                   });
                 },
               );
@@ -158,7 +166,11 @@ class _HomeLayoutState extends State<HomeLayout> {
         },
         child: Icon(fabIcon),
       ),
-      body: screens[currentIndex],
+      body: ConditionalBuilder(
+        condition: tasks.isNotEmpty,
+        builder: (context) => screens[currentIndex],
+        fallback: (context) => const Center(child: CircularProgressIndicator()),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
@@ -205,8 +217,13 @@ class _HomeLayoutState extends State<HomeLayout> {
       },
       onOpen: (dataBase) {
         getDataFromDataBase(dataBase).then((value) {
-          tasks = value;
-          debugPrint(tasks[0].toString());
+          setState(() {
+            tasks = value;
+          });
+
+          debugPrint(tasks.toString());
+        }).catchError((error) {
+          debugPrint('Error When Getting Data From Table ${error.toString()}');
         });
         debugPrint('database opened');
       },

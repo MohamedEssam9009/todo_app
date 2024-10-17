@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/components/components.dart';
+import 'package:todo_app/shared/components/components.dart';
+
+import '../shared/components/constants.dart';
 
 class NewTasksScreen extends StatelessWidget {
-  final List<Map>? tasks;
-
-  const NewTasksScreen({super.key, this.tasks});
+  const NewTasksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      itemBuilder: (context, index) => buildTaskItem(),
+      itemBuilder: (context, index) => buildTaskItem(tasks[index]),
       separatorBuilder: (context, index) => Padding(
         padding: const EdgeInsets.all(20.0),
         child: Container(
@@ -18,7 +18,7 @@ class NewTasksScreen extends StatelessWidget {
           color: Colors.grey[300],
         ),
       ),
-      itemCount: tasks?.length ?? 0,
+      itemCount: tasks.length,
     );
   }
 }
