@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Todo App',
       theme: ThemeData(useMaterial3: false),
-      home: const HomeLayout(),
+      home:  HomeLayout(),
     );
   }
 }
