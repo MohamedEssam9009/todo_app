@@ -26,7 +26,9 @@ class AppCubit extends Cubit<AppStates> {
   ];
   Database? database;
 
-  List<Map> tasks = [];
+  List<Map> newTasks = [];
+  List<Map> doneTasks = [];
+  List<Map> archivedTasks = [];
 
   void changeIndex(int index) {
     currentIndex = index;
@@ -53,13 +55,7 @@ class AppCubit extends Cubit<AppStates> {
         );
       },
       onOpen: (dataBase) {
-        getDataFromDataBase(dataBase).then((value) {
-          tasks = value;
-          emit(AppGetDatabaseState());
-          debugPrint(tasks.toString());
-        }).catchError((error) {
-          debugPrint('Error When Getting Data From Table ${error.toString()}');
-        });
+        getDataFromDataBase(dataBase);
         debugPrint('database opened');
       },
     ).then((value) {
@@ -68,9 +64,37 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  Future<List<Map>> getDataFromDataBase(Database dataBase) async {
+  void getDataFromDataBase(Database dataBase) {
+    
+    newTasks = [];
+    doneTasks = [];
+    archivedTasks = [];
+
     emit(AppGetDatabaseLoadingState());
-    return await dataBase.rawQuery('SELECT * FROM tasks');
+
+    dataBase.rawQuery('SELECT * FROM tasks').then((value) {
+      for (var element in value) {
+        if (element['status'] == 'new') {
+          newTasks.add(element);
+        } else if (element['status'] == 'done') {
+          doneTasks.add(element);
+        } else {
+          archivedTasks.add(element);
+        }
+      }
+
+      emit(AppGetDatabaseState());
+    }).catchError((error) {
+      debugPrint('Error When Getting Data From Table ${error.toString()}');
+    });
+  }
+
+  void updateData({required String status, required int id}) async {
+    database!.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?',
+        [status, '$id']).then((value) {
+      getDataFromDataBase(database!);
+      emit(AppUpdateDatabaseState());
+    });
   }
 
   insertToDataBase({
@@ -87,11 +111,7 @@ class AppCubit extends Cubit<AppStates> {
           (value) {
             debugPrint('inserted successfully');
             emit(AppInsertDatabaseState());
-            getDataFromDataBase(database!).then(
-              (value) {
-                tasks = value;
-                emit(AppGetDatabaseState());
-            });
+            getDataFromDataBase(database!);
           },
         ).catchError(
           (error) {
