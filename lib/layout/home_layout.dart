@@ -2,26 +2,15 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/shared/components/components.dart';
 import 'package:todo_app/shared/cubit/cubit.dart';
 import 'package:todo_app/shared/cubit/states.dart';
 
-import '../modules/archived_tasks_screen.dart';
-import '../modules/done_tasks_screen.dart';
-import '../modules/new_tasks_screen.dart';
-import '../shared/components/constants.dart';
-
 class HomeLayout extends StatelessWidget {
   HomeLayout({super.key});
 
-
-
-  Database? database;
   var scaffoldKey = GlobalKey<ScaffoldState>();
   var formKey = GlobalKey<FormState>();
-  bool isBottomSheetShown = false;
-  IconData fabIcon = Icons.edit;
 
   var titleController = TextEditingController();
   var timeController = TextEditingController();
@@ -30,44 +19,29 @@ class HomeLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => AppCubit(),
+      create: (context) => AppCubit()..createDataBase(),
       child: BlocConsumer<AppCubit, AppStates>(
         listener: (context, state) {
-          // TODO: implement listener
+          if (state is AppInsertDatabaseState) {
+            Navigator.pop(context);
+          }
         },
         builder: (context, state) {
-
-AppCubit cubit = AppCubit.get(context);
+          AppCubit cubit = AppCubit.get(context);
 
           return Scaffold(
             key: scaffoldKey,
-            appBar: AppBar( 
+            appBar: AppBar(
               title: Text(cubit.titles[cubit.currentIndex]),
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                if (isBottomSheetShown) {
+                if (cubit.isBottomSheetShown) {
                   if (formKey.currentState!.validate()) {
-                    insertToDataBase(
+                    cubit.insertToDataBase(
                       title: titleController.text,
                       time: timeController.text,
                       date: dateController.text,
-                    ).then(
-                      (value) {
-                        getDataFromDataBase(database!).then((value) {
-                          // setState(() {
-                          //   tasks = value;
-                          //   Navigator.of(context).pop();
-                          //   isBottomSheetShown = false;
-                          //   fabIcon = Icons.edit;
-                          // });
-
-                          debugPrint(tasks.toString());
-                        }).catchError((error) {
-                          debugPrint(
-                              'Error When Getting Data From Table ${error.toString()}');
-                        });
-                      },
                     );
                   }
                 } else {
@@ -151,21 +125,17 @@ AppCubit cubit = AppCubit.get(context);
                       )
                       .closed
                       .then((value) {
-                    isBottomSheetShown = false;
-                    // setState(() {
-                    //   fabIcon = Icons.edit;
-                    // });
+                    cubit.changeBottomSheetState(
+                        isShow: false, icon: Icons.edit);
+                    cubit.isBottomSheetShown = false;
                   });
-                  isBottomSheetShown = true;
-                  // setState(() {
-                  //   fabIcon = Icons.add;
-                  // });
+                  cubit.changeBottomSheetState(isShow: true, icon: Icons.add);
                 }
               },
-              child: Icon(fabIcon),
+              child: Icon(cubit.fabIcon),
             ),
             body: ConditionalBuilder(
-              condition: true,
+              condition: state is !AppGetDatabaseLoadingState,
               builder: (context) => cubit.screens[cubit.currentIndex],
               fallback: (context) =>
                   const Center(child: CircularProgressIndicator()),
@@ -173,8 +143,8 @@ AppCubit cubit = AppCubit.get(context);
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: cubit.currentIndex,
               onTap: (index) {
-               cubit.changeIndex(index);
-               },
+                cubit.changeIndex(index);
+              },
               type: BottomNavigationBarType.fixed,
               items: const [
                 BottomNavigationBarItem(
@@ -194,67 +164,6 @@ AppCubit cubit = AppCubit.get(context);
           );
         },
       ),
-    );
-  }
-
-  void createDataBase() async {
-    database = await openDatabase(
-      'todo.db',
-      version: 1,
-      onCreate: (dataBase, version) {
-        debugPrint('database created');
-        dataBase
-            .execute(
-                'CREATE TABLE tasks(id INTEGER PRIMARY KEY, title TEXT, date TEXT, time TEXT, status TEXT)')
-            .then(
-          (value) {
-            debugPrint('table created');
-          },
-        ).catchError(
-          (error) {
-            debugPrint('Error When Creating Table ${error.toString()}');
-          },
-        );
-      },
-      onOpen: (dataBase) {
-        getDataFromDataBase(dataBase).then((value) {
-          // setState(() {
-          //   tasks = value;
-          // });
-
-          debugPrint(tasks.toString());
-        }).catchError((error) {
-          debugPrint('Error When Getting Data From Table ${error.toString()}');
-        });
-        debugPrint('database opened');
-      },
-    );
-  }
-
-  Future<List<Map>> getDataFromDataBase(Database dataBase) async {
-    return await dataBase.rawQuery('SELECT * FROM tasks');
-  }
-
-  Future insertToDataBase({
-    required String title,
-    required String time,
-    required String date,
-  }) async {
-    return await database!.transaction(
-      (txn) async {
-        await txn
-            .rawInsert(
-                'INSERT INTO tasks(title, date, time, status) VALUES("$title", "$date", "$time", "new")')
-            .then(
-          (value) {
-            debugPrint('inserted successfully');
-          },
-        ).catchError(
-          (error) {
-            debugPrint('Error When Inserting New Record ${error.toString()}');
-          },
-        );
-      },
     );
   }
 }
