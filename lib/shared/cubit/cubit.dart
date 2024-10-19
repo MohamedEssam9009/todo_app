@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:todo_app/shared/cubit/states.dart';
+import 'states.dart';
 
 import '../../modules/archived_tasks_screen.dart';
 import '../../modules/done_tasks_screen.dart';
