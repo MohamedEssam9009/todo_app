@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'layout/home_layout.dart';
 
 import 'shared/bloc_observer.dart';
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Todo App',
       theme: ThemeData(useMaterial3: false),
-      home:  HomeLayout(),
+      home: HomeLayout(),
     );
   }
 }

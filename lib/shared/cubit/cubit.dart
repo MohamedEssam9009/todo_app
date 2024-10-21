@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sqflite/sqflite.dart';
-import 'states.dart';
 
 import '../../modules/archived_tasks_screen.dart';
 import '../../modules/done_tasks_screen.dart';
 import '../../modules/new_tasks_screen.dart';
+import 'states.dart';
 
 class AppCubit extends Cubit<AppStates> {
   AppCubit() : super(AppInitialState());
@@ -65,7 +65,6 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   void getDataFromDataBase(Database dataBase) {
-    
     newTasks = [];
     doneTasks = [];
     archivedTasks = [];
@@ -97,7 +96,7 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-   void deleteData({required int id}) async {
+  void deleteData({required int id}) async {
     database!.rawDelete('DELETE FROM tasks WHERE id = ?', [id]).then((value) {
       getDataFromDataBase(database!);
       emit(AppDeleteDatabaseState());
