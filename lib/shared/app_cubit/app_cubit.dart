@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import '../../modules/archived_tasks_screen.dart';
 import '../../modules/done_tasks_screen.dart';
 import '../../modules/new_tasks_screen.dart';
-import 'states.dart';
+import 'app_states.dart';
 
 class AppCubit extends Cubit<AppStates> {
   AppCubit() : super(AppInitialState());

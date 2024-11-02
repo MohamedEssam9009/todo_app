@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../shared/components/components.dart';
-import '../shared/cubit/cubit.dart';
-import '../shared/cubit/states.dart';
+import '../shared/app_cubit/app_cubit.dart';
+import '../shared/app_cubit/app_states.dart';
 
 class HomeLayout extends StatelessWidget {
   HomeLayout({super.key});
