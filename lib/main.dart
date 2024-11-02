@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'layout/home_layout.dart';
 
-import 'shared/bloc_observer.dart';
+import 'bloc_observer.dart';
 
 void main() {
   Bloc.observer = MyBlocObserver();

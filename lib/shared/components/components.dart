@@ -64,6 +64,15 @@ Widget defaultFormField({
       ),
     );
 
+Widget myDivider() => Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Container(
+        width: double.infinity,
+        height: 1.0,
+        color: Colors.grey[300],
+      ),
+    );
+
 Widget buildTaskItem(Map model, context) => Dismissible(
       key: Key(model['id'].toString()),
       onDismissed: (direction) {
@@ -156,14 +165,7 @@ Widget taskBuilder({required List<Map> tasks}) {
     ),
     builder: (context) => ListView.separated(
       itemBuilder: (context, index) => buildTaskItem(tasks[index], context),
-      separatorBuilder: (context, index) => Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Container(
-          width: double.infinity,
-          height: 1.0,
-          color: Colors.grey[300],
-        ),
-      ),
+      separatorBuilder: (context, index) => myDivider(),
       itemCount: tasks.length,
     ),
   );
